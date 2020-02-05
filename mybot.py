@@ -10,6 +10,7 @@ class StevenBot(sc2.BotAI):
         await self.build_workers()
         await self.build_pylons()
         await self.build_assimilators()
+        await self.expand()
 
     async def build_workers(self):
         for nexus in self.units(NEXUS).ready.noqueue:
@@ -25,7 +26,7 @@ class StevenBot(sc2.BotAI):
 
     async def build_assimilators(self):
         for nexus in self.units(NEXUS).ready:
-            vaspenes = self.state.vespene_geyser.closer_than(25.0, nexus)
+            vaspenes = self.state.vespene_geyser.closer_than(15.0, nexus)
             for vesp in vaspenes:
                 if not self.can_afford(ASSIMILATOR):
                     break
@@ -35,7 +36,12 @@ class StevenBot(sc2.BotAI):
                 if not self.units(ASSIMILATOR).closer_than(1.0, vesp).exists:
                     await self.do(worker.build(ASSIMILATOR, vesp))
 
+    async def expand(self):
+        if self.units(NEXUS).amount < 3 and self.can_afford(NEXUS):
+            await self.expand_now()
+
+
 run_game(maps.get("AbyssalReefLE"), [
     Bot(Race.Protoss, StevenBot()),
     Computer(Race.Terran, Difficulty.Easy)
-    ], realtime=True)
+    ], realtime=False)
